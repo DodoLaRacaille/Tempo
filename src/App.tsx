@@ -10,7 +10,7 @@ interface YourData {
 }
 
 function ItemLines() {
-  const [items, setItems] = useState<YourData[]>(data);
+  const [items] = useState<YourData[]>(data);
   const [searchTerm, setSearchTerm] = useState<string>('');
 
   const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -46,7 +46,7 @@ function ItemCard({ data }: { data: YourData }) {
     <div className="item" onMouseEnter={toggleCraftImage} onMouseLeave={toggleCraftImage}>
       <img className="itemImage" src={imagePath} alt={data.ItemName} />
       <p className="itemName">{data.ItemName}</p>
-      {showCraftImage && <img className="craftImage" src={imageCraft}/>}
+      {showCraftImage && <img className="craftImage" src={imageCraft} alt={data.ItemCraft}/>}
     </div>
   );
 }
