@@ -6,6 +6,9 @@
       "dom.iterable",
       "esnext"
     ],
+    "types": [
+      "socket.io-client"
+    ],
     "allowJs": true,
     "skipLibCheck": true,
     "esModuleInterop": true,
