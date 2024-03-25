@@ -23,3 +23,19 @@
   width: 50px; /* Taille fixe de l'image */
   height: 50px; /* Taille fixe de l'image */
 }
+
+.checkIcon,
+.crossIcon {
+  width: 30px; /* Ajustez la taille selon vos besoins */
+  height: 30px; /* Ajustez la taille selon vos besoins */
+  cursor: pointer;
+  margin-left: 50px; /* Ajoutez un espacement entre les icônes */
+}
+
+.craftImage {
+  position: absolute;
+  top: 0;
+  right: 0;
+  height: 300px; /* Réglez la hauteur pour qu'elle corresponde à la hauteur de la carte */
+  object-fit: cover; /* Empêche le débordement de l'image */
+}
