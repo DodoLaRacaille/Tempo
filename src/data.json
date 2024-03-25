@@ -1,0 +1,9 @@
+[
+    { "ItemName": "Epée en diamant", "ItemImage": "diamond_sword.png", "ItemCraft": "craft_diamond_sword.png" },
+    { "ItemName": "Epée en cobble", "ItemImage": "stone_sword.png", "ItemCraft": "image2.png" },
+    { "ItemName": "Epée en or", "ItemImage": "golden_sword.png", "ItemCraft": "image2.png" },
+    { "ItemName": "Epée en netherite", "ItemImage": "netherite_sword.png", "ItemCraft": "image2.png" },
+    { "ItemName": "Epée en bois", "ItemImage": "wooden_sword.png", "ItemCraft": "image2.png" },
+    { "ItemName": "Item 1", "ItemImage": "image1.png", "ItemCraft": "image2.png" },
+    { "ItemName": "Item 1", "ItemImage": "image1.png", "ItemCraft": "image2.png" }
+]
