@@ -1,89 +1,112 @@
-// App.tsx
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect  } from 'react';
 import './App.css';
+import data from './data.json';
+import Header from './components/header/header'
 import socketIOClient from 'socket.io-client';
 
 interface YourData {
   ItemName: string;
   ItemImage: string;
   ItemCraft: string;
-  isChecked: boolean; // Champ pour stocker l'état de la case à cocher
 }
 
-const ENDPOINT = 'http://localhost:5000'; // Adresse du serveur Socket.io
+const ENDPOINT = 'http://localhost:5000'; // Mettez ici l'adresse de votre serveur Socket.io
 
 function ItemLines() {
-  const [items, setItems] = useState<YourData[]>([]);
+
+  const [items] = useState<YourData[]>(data);
+  const [searchTerm, setSearchTerm] = useState<string>('');
+  const [checkboxState, setCheckboxState] = useState<{ [key: string]: boolean }>({});
   const socket = socketIOClient(ENDPOINT);
 
   useEffect(() => {
-    socket.on('updateState', (updatedItems: YourData[]) => {
-      setItems(updatedItems);
+    const socket = socketIOClient(ENDPOINT);
+  
+    socket.on('initialState', (data: { [key: string]: boolean }) => {
+      setCheckboxState(data);
     });
-
-        // Récupérer les données initiales du serveur
-        fetchItems();
-
+  
+    socket.on('updateState', (data: { [key: string]: boolean }) => {
+      setCheckboxState(data);
+    });
+  
     return () => {
-      socket.off('updateState');
+      socket.disconnect();
     };
-  }, [socket]);
+  }, []);
 
-  const handleCheckboxChange = (itemName: string, isChecked: boolean) => {
-    const updatedItems = items.map(item =>
-      item.ItemName === itemName ? { ...item, isChecked } : item
-    );
-    setItems(updatedItems);
-    socket.emit('updateState', updatedItems);
+  const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(event.target.value);
   };
+  
+  // Filtrer les éléments en fonction de la chaîne de recherche
+  const filteredItems = items.filter(item =>
+    item.ItemName.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
-  const fetchItems = async () => {
-    try {
-      const response = await fetch('http://localhost:5000/items');
-      if (!response.ok) {
-        throw new Error('Failed to fetch items');
-      }
-      const data = await response.json();
-      setItems(data);
-    } catch (error) {
-      console.error('Error fetching items:', error);
-    }
+  const handleCheckboxChange = (itemName: string) => {
+    const newState = { ...checkboxState, [itemName]: !checkboxState[itemName] };
+    setCheckboxState(newState);
+    socket.emit('updateState', newState);
   };
 
   return (
     <div className="container">
-      <Header />
-      {items.map((item, index) => (
-        <ItemCard key={index} data={item} onCheckboxChange={handleCheckboxChange} />
-      ))}
+      <Header/>
+      <SearchBar searchTerm={searchTerm} handleSearch={handleSearch} />
+      {filteredItems.map((item, index) => (
+        <ItemCard key={index} data={item} checked={checkboxState[item.ItemName]} onCheckboxChange={() => handleCheckboxChange(item.ItemName)} />      ))}
     </div>
   );
 }
+function ItemCard({ data, checked, onCheckboxChange }: { data: YourData, checked: boolean, onCheckboxChange: () => void }) {
+  const [showCraftImage, setShowCraftImage] = useState(false);
+  const [isChecked, setIsChecked] = useState(checked);
 
-function ItemCard({ data, onCheckboxChange }: { data: YourData; onCheckboxChange: (itemName: string, isChecked: boolean) => void }) {
-  const { ItemName, ItemImage, isChecked } = data;
-
-  const toggleCheckbox = () => {
-    onCheckboxChange(ItemName, !isChecked);
+  const toggleCraftImage = () => {
+    setShowCraftImage(!showCraftImage);
   };
 
+  const toggleCheckbox = () => {
+    setIsChecked(!isChecked);
+    onCheckboxChange();
+  };
+
+  const imageCraft = `/crafts/${data.ItemCraft}`;
+
   return (
-    <div className="item">
-      <img className="itemImage" src={`/items/${ItemImage}`} alt={ItemName} />
-      <p className="itemName">{ItemName}</p>
-      <img className="crossIcon" src="/cross.png" alt="Cross" style={{ display: isChecked ? 'inline' : 'none' }} onClick={toggleCheckbox} />
-      <img className="checkIcon" src="/check.png" alt="Check" style={{ display: isChecked ? 'none' : 'inline' }} onClick={toggleCheckbox} />
+    <div className="item" >
+      <img className="itemImage" onMouseEnter={toggleCraftImage} onMouseLeave={toggleCraftImage} src={`/items/${data.ItemImage}`} alt={data.ItemName} />
+      <p className="itemName">{data.ItemName}</p>
+    {isChecked ? (
+      <img className="checkIcon" src="/check.png" alt="Check" onClick={toggleCheckbox} />
+    ) : (
+      <img className="crossIcon" src="/cross.png" alt="Cross" onClick={toggleCheckbox} />
+    )}
     
-    </div>
+    {showCraftImage && <img className="craftImage" src={imageCraft} alt={data.ItemCraft}/>}
+
+    </div> 
+  
   );
 }
-
-function Header() {
+// Composant SearchBar pour la recherche
+function SearchBar({
+  searchTerm,
+  handleSearch
+}: {
+  searchTerm: string;
+  handleSearch: (event: React.ChangeEvent<HTMLInputElement>) => void;
+}) {
   return (
-    <div className="header">
-      <h1>Items List</h1>
+    <div className="searchBar">
+      <input
+        type="text"
+        placeholder="Search..."
+        value={searchTerm}
+        onChange={handleSearch}
+      />
     </div>
   );
 }
-
 export default ItemLines;
